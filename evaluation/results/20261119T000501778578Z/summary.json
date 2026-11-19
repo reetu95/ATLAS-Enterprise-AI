@@ -1,0 +1,24 @@
+{
+  "requests": 5,
+  "outcomes": {
+    "response": 5
+  },
+  "statuses": {
+    "answered": 5
+  },
+  "http_failure_rate": 0.0,
+  "successful_response_count": 5,
+  "successful_response_p50_ms": 2887.32,
+  "successful_response_p95_ms": 3320.05,
+  "answered_count": 5,
+  "answered_p50_ms": 2887.32,
+  "answered_p95_ms": 3320.05,
+  "quality_metrics": "Pending manual review; no automatic accuracy claims",
+  "latency_scope": "Client HTTP round trip including API, database, retrieval, generation and persistence; no browser rendering",
+  "not_measured": [
+    "ingestion",
+    "separate retrieval/model durations",
+    "cost",
+    "concurrent capacity"
+  ]
+}

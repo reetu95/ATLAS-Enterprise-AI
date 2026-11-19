@@ -1,0 +1,11 @@
+{
+  "chat_model": "amazon.nova-lite-v1:0",
+  "embedding_model": "amazon.titan-embed-text-v2:0",
+  "aws_region": "us-east-2",
+  "min_relevance": 0.25,
+  "embedding_dimensions": 1024,
+  "top_k": 5,
+  "temperature": 0.1,
+  "max_tokens": 750,
+  "reviewer": "Codex assistant; not independent human review"
+}

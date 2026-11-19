@@ -1,0 +1,40 @@
+{
+  "unique_cases": 5,
+  "trials": 5,
+  "answer_correctness": {
+    "applicable_trials": 5,
+    "reviewed_trials": 5,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 1.0,
+    "mean_score_on_reviewed": 1.0
+  },
+  "citations_on_generated_answers": {
+    "applicable_trials": 5,
+    "reviewed_trials": 5,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 0.8,
+    "mean_score_on_reviewed": 0.8
+  },
+  "retrieval_hit": {
+    "applicable_trials": 5,
+    "reviewed_trials": 5,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 1.0,
+    "mean_score_on_reviewed": 1.0
+  },
+  "unanswerable": {
+    "applicable_trials": 0,
+    "reviewed_trials": 0,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": null,
+    "mean_score_on_reviewed": null
+  },
+  "direct_prompt_injection": {
+    "applicable_trials": 0,
+    "reviewed_trials": 0,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": null,
+    "mean_score_on_reviewed": null
+  },
+  "note": "Rates use reviewed trials only. Publish missing counts; review failures as zero for strict task success. Trials are not independent unique questions."
+}

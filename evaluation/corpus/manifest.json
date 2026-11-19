@@ -1,0 +1,37 @@
+[
+  {
+    "id": "time-away",
+    "url": "https://handbook.gitlab.com/handbook/people-group/time-off-and-absence/time-away-philosophy/",
+    "file": "time-away.txt",
+    "fetched_at": "2026-11-18T23:28:04.149122+00:00",
+    "sha256": "6a9c0f2d31ae23827b789fb1e71c70c98ebc7afbcaaf9f7e78af10a6e2aaaeb2"
+  },
+  {
+    "id": "time-off",
+    "url": "https://handbook.gitlab.com/handbook/people-group/time-off-and-absence/",
+    "file": "time-off.txt",
+    "fetched_at": "2026-11-18T23:28:04.949383+00:00",
+    "sha256": "eb4e6e998c0c6b8e57eaa96955357fc98c626b30d05b8ad19f6a9cb71c1d4810"
+  },
+  {
+    "id": "communication",
+    "url": "https://handbook.gitlab.com/handbook/communication/",
+    "file": "communication.txt",
+    "fetched_at": "2026-11-18T23:28:05.710373+00:00",
+    "sha256": "0304763e44ec48ea6d5ad0906c8d086f65f00dd3418151782a2587ad849188a0"
+  },
+  {
+    "id": "handbook-first",
+    "url": "https://handbook.gitlab.com/handbook/company/culture/all-remote/handbook-first/",
+    "file": "handbook-first.txt",
+    "fetched_at": "2026-11-18T23:28:06.473418+00:00",
+    "sha256": "2179c392443c923b319304fc186f6b0599943149ff9177d13381fd6deeae37eb"
+  },
+  {
+    "id": "meetings",
+    "url": "https://handbook.gitlab.com/handbook/company/culture/all-remote/meetings/",
+    "file": "meetings.txt",
+    "fetched_at": "2026-11-18T23:28:07.249530+00:00",
+    "sha256": "219bfcb50b3e0f3f1ba1013954e1d9839b496f77b224967dd9071a1d007b1b23"
+  }
+]

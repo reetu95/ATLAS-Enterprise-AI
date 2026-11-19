@@ -1,0 +1,27 @@
+{
+  "requests": 180,
+  "outcomes": {
+    "response": 177,
+    "guardrail_block": 3
+  },
+  "statuses": {
+    "answered": 129,
+    "no_evidence": 48,
+    "guardrail_block": 3
+  },
+  "http_failure_rate": 0.0,
+  "successful_response_count": 177,
+  "successful_response_p50_ms": 2197.57,
+  "successful_response_p95_ms": 3514.82,
+  "answered_count": 129,
+  "answered_p50_ms": 2353.8,
+  "answered_p95_ms": 3600.26,
+  "quality_metrics": "Pending manual review; no automatic accuracy claims",
+  "latency_scope": "Client HTTP round trip including API, database, retrieval, generation and persistence; no browser rendering",
+  "not_measured": [
+    "ingestion",
+    "separate retrieval/model durations",
+    "cost",
+    "concurrent capacity"
+  ]
+}

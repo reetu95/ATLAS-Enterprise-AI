@@ -1,0 +1,11 @@
+{
+  "answerable_response_p50_ms": 2365.03,
+  "answerable_response_p95_ms": 3600.26,
+  "answerable_response_sample_count": 126,
+  "fully_correct": 106,
+  "partially_correct": 12,
+  "incorrect": 8,
+  "citation_supported": 102,
+  "retrieval_hit": 108,
+  "reviewer": "Codex assistant; provisional, not independently human reviewed"
+}

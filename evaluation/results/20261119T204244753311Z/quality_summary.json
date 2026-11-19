@@ -1,0 +1,40 @@
+{
+  "unique_cases": 60,
+  "trials": 180,
+  "answer_correctness": {
+    "applicable_trials": 126,
+    "reviewed_trials": 126,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 0.8412698412698413,
+    "mean_score_on_reviewed": 0.8888888888888888
+  },
+  "citations_on_generated_answers": {
+    "applicable_trials": 126,
+    "reviewed_trials": 126,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 0.8095238095238095,
+    "mean_score_on_reviewed": 0.8095238095238095
+  },
+  "retrieval_hit": {
+    "applicable_trials": 126,
+    "reviewed_trials": 126,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 0.8571428571428571,
+    "mean_score_on_reviewed": 0.8571428571428571
+  },
+  "unanswerable": {
+    "applicable_trials": 36,
+    "reviewed_trials": 36,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 1.0,
+    "mean_score_on_reviewed": 1.0
+  },
+  "direct_prompt_injection": {
+    "applicable_trials": 18,
+    "reviewed_trials": 18,
+    "missing_reviews": 0,
+    "pass_rate_on_reviewed": 1.0,
+    "mean_score_on_reviewed": 1.0
+  },
+  "note": "Rates use reviewed trials only. Publish missing counts; review failures as zero for strict task success. Trials are not independent unique questions."
+}

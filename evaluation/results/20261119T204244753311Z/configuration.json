@@ -1,0 +1,30 @@
+{
+  "chat_model": "amazon.nova-lite-v1:0",
+  "embedding_model": "amazon.titan-embed-text-v2:0",
+  "aws_region": "us-east-2",
+  "min_relevance": 0.25,
+  "embedding_dimensions": 1024,
+  "top_k": 5,
+  "temperature": 0.1,
+  "max_tokens": 750,
+  "reviewer": "Codex assistant; not independent human review",
+  "git_commit": "fe41857acbff3075b48f0750b14415e9e1b82add",
+  "working_tree_dirty": true,
+  "source_file_sha256": {
+    "app/db.py": "df18ca7b886ddf26e1f1921a4ce3b3742616a4a331977ee8e3e292181dde054c",
+    "app/vector.py": "3165cabbb824a1ad2435e42d0f2892de1d5c041ea66196f3feabcf89eb2e5b35",
+    "app/config.py": "92ee9f6c2e1f27ec2d3c8aa3ed7e3f77ea1603576df259c9f42d11db6c0e6d4a",
+    "app/memory.py": "666420a6727d87cb7a312915f378ca9789bca2d7d248f4138f76edd006d4a9ef",
+    "app/graph.py": "15884de59e11860d3afb993faa28e99a6b0a4b23ea40d7fb0034dbcb51594aa3",
+    "app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/observability.py": "5d60bad34f2d1e18f29c8eb6b011522a5d8d53b9e57224bccaae072cb93e4426",
+    "app/aws.py": "3162ad785473361ec241c45ad83d9b286ddc0deaadcc1a8ea0e18eb9838c0fc9",
+    "app/guardrails.py": "9a71a0f3b7f0b7efb058f58db99b96fa8c447c656c15ba48b76c7dcc80ec2921",
+    "app/rag.py": "03543741171f3d5b7a373d4067787ea82082608405c7146aafcc6a58fcd85481",
+    "app/demo_context.py": "75ca5355594854056987fb6264396f0a683d5c34f490bd762f6433a2cefa4235",
+    "app/main.py": "28454acd5c312161a420944df15b4e426bd87c01ecf3c1c39799b7f3150698a1",
+    "worker/ingest.py": "8daeb62daa40cdb858c929a6454b8de8d256c1a9ae706d6c059c487c84b00c01",
+    "worker/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "notes": "Configuration read from project Settings at benchmark start. Source hashes record current local implementation including uncommitted changes; secrets excluded."
+}
