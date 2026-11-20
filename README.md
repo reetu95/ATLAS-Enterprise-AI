@@ -6,7 +6,7 @@
 
 **Document intelligence · Conversational memory · Guardrails · Human review · Observability · CI/CD**
 
-[Overview](#overview) · [Architecture](#architecture) · [Quick Start](#quick-start) · [Evaluation](#evaluation-results) · [Deployment Plan](#cicd-deployment-to-aws) · [API](#api-reference) · [Security](#security-and-production-readiness)
+[Overview](#overview) · [Architecture](#architecture) · [Quick Start](#quick-start) · [Evaluation](#evaluation-results) · [AWS Deployment](#cicd-deployment-to-aws) · [API](#api-reference) · [Security](#security-and-production-readiness)
 
 </div>
 
@@ -16,7 +16,9 @@
 
 **Atlas Enterprise AI** is a full-stack, educational enterprise knowledge assistant that answers natural-language questions over uploaded organizational documents using retrieval-augmented generation (RAG). It combines a FastAPI backend, LangGraph orchestration, Amazon Bedrock models, Pinecone vector search, and PostgreSQL-backed conversation history with an HTML/CSS/JavaScript interface.
 
-The project demonstrates how to connect document ingestion, grounded question answering, safety checks, human-in-the-loop (HITL) review, operational auditing, and observability into one AI application. The deployment section describes a proposed approach using **Docker, Amazon ECR, Amazon EC2, and GitHub Actions with a self-hosted runner**. Docker and workflow files are not included in this checkout, so automated deployment is not presented as implemented or tested.
+The project demonstrates how to connect document ingestion, grounded question answering, safety checks, human-in-the-loop (HITL) review, operational auditing, and observability into one AI application. The application has been successfully deployed using **GitHub Actions, Docker, Amazon ECR, and an Amazon EC2 self-hosted runner**. The pipeline builds a commit-tagged image, publishes it to ECR, starts it on EC2, and verifies the application readiness endpoint.
+
+> **Hosting status:** The EC2 instance is currently **stopped to reduce hosting costs**, so the hosted application and self-hosted runner are offline. The successful deployment is recorded in [workflow run #44663963607](https://github.com/reetu95/ATLAS-Enterprise-AI/actions/runs/44663963607). Restart EC2 and ensure the runner is running before requesting another deployment.
 
 > **Project status:** Teaching/reference implementation. It is **not production-secure as shipped**: the demo identity context is not a real authentication or authorization system, approval decisions do not automatically execute destructive operations, and production-grade availability and rollback controls must be added separately.
 
@@ -33,11 +35,11 @@ The project demonstrates how to connect document ingestion, grounded question an
 | Audit and feedback | Store relevant application events and user feedback in PostgreSQL. |
 | Observability | Optional GlassFlow Rius instrumentation for supported execution traces and diagnostics. |
 | Web dashboard | Document upload, chat, history, approvals, and operational views in a lightweight UI. |
-| Deployment plan | Proposed Docker, ECR, EC2, and GitHub Actions setup; implementation files are not included in this checkout. |
+| Automated deployment | GitHub Actions checks Python syntax, builds and pushes a Docker image to ECR, deploys on an EC2 self-hosted runner, and verifies readiness. |
 
 ## Technology Stack
 
-The application stack below is implemented. Docker, ECR, EC2, and GitHub Actions describe the proposed deployment setup, which was not part of the measured local evaluation.
+The application and AWS deployment stack below are implemented. The evaluation results later in this README were measured locally, not on EC2.
 
 | Layer | Technology | Purpose |
 | --- | --- | --- |
@@ -84,13 +86,13 @@ flowchart TD
 
 > **Ingestion note:** In the reference implementation, upload completion can perform ingestion synchronously. For larger documents and production traffic, move ingestion to a durable asynchronous worker or job service.
 
-### Proposed AWS CI/CD deployment architecture
+### AWS CI/CD deployment architecture
 
 ```mermaid
 flowchart LR
     DEV[Developer] -->|Git push to main| GH[GitHub repository]
     GH -->|Trigger| GA[GitHub Actions]
-    GA --> CI[CI: source checks / tests]
+    GA --> CI[CI: Python syntax check]
     CI --> BUILD[CD: Docker build]
     BUILD -->|Push versioned image| ECR[Amazon ECR]
     ECR -->|Pull image| EC2[Amazon EC2]
@@ -100,7 +102,9 @@ flowchart LR
     DOCKER --> SERVICES[Bedrock · S3 · Pinecone · PostgreSQL · Rius]
 ```
 
-**Proposed deployment flow:** Once the workflow is implemented, a commit to `main` would trigger GitHub Actions. The CI job runs configured checks; the delivery job builds and pushes an image tagged with the Git commit SHA to ECR. The deployment job runs on the trusted EC2 self-hosted runner, pulls that image, and replaces the application container. The instance needs outbound access to the external services.
+**Deployment flow:** A push to `main` triggers GitHub Actions unless the change only touches `README.md`; manual dispatch is also supported. CI runs a Python syntax check. The delivery job builds and pushes an image tagged with the Git commit SHA to ECR. The deployment job runs on the EC2 runner labeled `self-hosted`, `linux`, `x64`, and `atlas-ec2`, pulls that exact image, validates runtime settings, replaces the container, and checks readiness. The instance needs outbound access to the external services.
+
+See the [workflow source](.github/workflows/cicd.yaml), [successful workflow runs](https://github.com/reetu95/ATLAS-Enterprise-AI/actions/workflows/cicd.yaml?query=is%3Asuccess), and [verified successful deployment run](https://github.com/reetu95/ATLAS-Enterprise-AI/actions/runs/44663963607).
 
 ## Repository Structure
 
@@ -135,12 +139,15 @@ flowchart LR
 │   ├── results/                # Saved responses, scores, and reports
 │   └── README.md               # Evaluation procedure and limitations
 ├── docs/                       # Setup notes
+├── .github/workflows/
+│   └── cicd.yaml               # CI, ECR image delivery, and EC2 deployment
+├── Dockerfile                  # Non-root Python 3.12 application container
 ├── requirements.txt
 ├── LICENSE                     # Apache License 2.0
 └── .env.example
 ```
 
-> `Dockerfile` and `.github/workflows/` must be added before using the proposed container and CI/CD deployment steps.
+> The [Dockerfile](Dockerfile) and [CI/CD workflow](.github/workflows/cicd.yaml) are included in this repository.
 
 ## Prerequisites
 
@@ -223,7 +230,7 @@ RIUS_DISABLED=false
 RIUS_CAPTURE_CONTENT=false
 ```
 
-For local AWS access, use an appropriate AWS credential provider (for example, an AWS profile or environment credentials). **On EC2, prefer an IAM instance role** and do not put long-lived AWS keys into Docker images or GitHub secrets.
+For local AWS access, use an appropriate AWS credential provider (for example, an AWS profile or environment credentials). The implemented deployment reads AWS access keys from GitHub’s `production` environment secrets and passes them to the container at runtime; it does not bake them into the image. Migrating to GitHub OIDC and an EC2 IAM instance role remains a production-hardening improvement.
 
 Never commit `.env` or any real secrets. The exact supported variable names are defined in `app/config.py` and `.env.example`; use those files as the source of truth.
 
@@ -266,7 +273,7 @@ The origin must match the address in your browser, including port **8001**. Thes
 
 ## Run with Docker
 
-This is a proposed setup. Add a `Dockerfile` that starts Uvicorn on `0.0.0.0:8000` inside the container before using these commands. Host port **8001** maps to container port **8000**.
+The [Dockerfile](Dockerfile) uses `python:3.12-slim`, installs dependencies, copies `app/` and `worker/`, and runs Uvicorn as the non-root `atlas` user on `0.0.0.0:8000`. Host port **8001** maps to container port **8000**, matching the EC2 workflow.
 
 Build the image:
 
@@ -281,66 +288,55 @@ docker run --rm --name atlas-enterprise-ai \
   --env-file .env -p 8001:8000 atlas-enterprise-ai:local
 ```
 
-On Linux, if using an AWS profile instead of environment credentials, provide credentials through a secure supported mechanism. For the EC2 deployment, the container should use the instance role's credentials.
+On Linux, if using an AWS profile instead of environment credentials, provide credentials through a secure supported mechanism. The local example uses `.env`; the EC2 workflow instead injects named environment variables from GitHub’s `production` environment secrets using Docker `-e` flags.
 
 ## CI/CD Deployment to AWS
 
-The following steps are a deployment plan; they are not evidence of an implemented or tested pipeline.
+Deployment is implemented in [`.github/workflows/cicd.yaml`](.github/workflows/cicd.yaml) using **GitHub Actions + Docker + Amazon ECR + an EC2 self-hosted runner**.
 
-The proposed deployment pattern uses **GitHub Actions + Amazon ECR + an EC2 self-hosted runner + Docker**.
+**Deployment evidence:** [Successful run #44663963607](https://github.com/reetu95/ATLAS-Enterprise-AI/actions/runs/44663963607) completed Continuous Integration, Continuous Delivery, and Continuous Deployment, including the `Verify Deployment` step. Browse [successful workflow runs](https://github.com/reetu95/ATLAS-Enterprise-AI/actions/workflows/cicd.yaml?query=is%3Asuccess) for the execution history.
 
-### AWS resources
+**Current hosting state:** EC2 is stopped to reduce hosting costs. The live application is unavailable and the self-hosted runner is offline while the instance is stopped. The saved workflow run remains available as deployment evidence. Start the instance and runner before a new deployment; the workflow does not start EC2 itself.
 
-1. **ECR:** Create a private repository named `atlas-enterprise-ai` (or choose your own name).
-2. **EC2:** Launch a Linux instance with Docker, AWS CLI, and a GitHub Actions self-hosted runner. Restrict network access and protect the runner.
-3. **EC2 IAM role:** Grant the permissions required to pull ECR images and invoke the application services (Bedrock and the specific S3 bucket). Avoid permanent access keys on the instance.
-4. **GitHub IAM role:** Configure GitHub Actions OIDC for temporary credentials, with permissions to push to the target ECR repository and a trust policy restricted to your repository/branch.
-5. **Runtime configuration:** Store the application environment securely on EC2 (for a basic demo, `/opt/atlas/.env` with restrictive permissions; prefer a managed secret store in production).
+### AWS resources and credentials
+
+- **ECR:** Stores the Docker image under the repository named by `ECR_REPOSITORY_NAME`.
+- **EC2:** Hosts Docker and the registered GitHub Actions runner with labels `self-hosted`, `linux`, `x64`, and `atlas-ec2`.
+- **AWS authentication:** Both delivery and deployment jobs use `aws-actions/configure-aws-credentials@v4` with `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` from the GitHub **`production` environment secrets**. The workflow currently uses access keys, not OIDC or an instance role.
+- **Runtime configuration:** The workflow validates application settings and passes them into the container with named Docker `-e` flags. It does not use `/opt/atlas/.env` for EC2 deployment.
 
 ### GitHub Actions configuration
 
-Add the following repository **Variables** under `Settings → Secrets and variables → Actions → Variables`:
+The delivery and deployment jobs both declare `environment: production`. Configure the following under **Settings → Environments → production → Environment secrets**, matching the workflow’s `secrets.*` references:
 
-| Name | Example |
+| Group | Environment secret names |
 | --- | --- |
-| `AWS_REGION` | `us-east-1` |
-| `ECR_REPOSITORY_NAME` | `atlas-enterprise-ai` |
+| AWS and image repository | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `ECR_REPOSITORY_NAME`, `S3_BUCKET` |
+| Bedrock | `BEDROCK_EMBED_MODEL`, `BEDROCK_CHAT_MODEL`, `EMBED_DIM` |
+| Pinecone | `PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `PINECONE_CLOUD`, `PINECONE_REGION`, `PINECONE_READY_TIMEOUT` |
+| PostgreSQL | `DATABASE_URL` |
+| Observability | `RIUS_API_KEY`, `RIUS_SERVICE_NAME`, `RIUS_DISABLED`, `RIUS_CAPTURE_CONTENT` |
+| Application | `HITL_ENABLED`, `MEMORY_TURNS` |
 
-Add this repository **Secret**:
+`ECR_REPOSITORY_NAME` is the repository name, not the full ECR URI. The delivery job obtains the registry from ECR login; the deployment job reconstructs it using the AWS account ID and region. The validation step currently requires all listed application settings to be non-empty, including the Rius settings. Keep actual secret values out of source control and documentation.
 
-| Name | Purpose |
-| --- | --- |
-| `AWS_ROLE_ARN` | ARN of the AWS IAM role assumed by GitHub Actions using OIDC |
+### Implemented pipeline
 
-**Important:** `ECR_REPOSITORY_NAME` is just the name, **not** the full ECR URI. The ECR login action provides the registry URL.
+1. **Trigger:** Push to `main` with `README.md`-only changes ignored, or run manually using `workflow_dispatch`. Runs share the `atlas-deployment` concurrency group and do not cancel an in-progress run.
+2. **Continuous Integration:** On `ubuntu-latest`, check out the source, set up Python 3.12, and run `python -m compileall -q app worker scripts`. This checks syntax; it is not a unit-test or RAG evaluation suite.
+3. **Continuous Delivery:** On `ubuntu-latest`, configure AWS credentials, log into ECR, build the Docker image, tag it with `${{ github.sha }}`, and push it to ECR.
+4. **Continuous Deployment:** On the EC2 self-hosted runner, configure AWS credentials, log into ECR, reconstruct the commit-tagged image URI, pull the image, and validate application settings.
+5. **Container replacement:** Remove the old `atlas-enterprise-ai` container and start the new image with `--restart unless-stopped`, runtime environment variables, and **`-p 8001:8000`**.
+6. **Readiness verification:** Check **`http://127.0.0.1:8001/health/ready`** on EC2 up to 20 times, using a 3-second connection timeout, a 5-second request timeout, and 3-second retry delays. A successful HTTP response passes the step. If all attempts fail, print the last 100 container log lines and fail the job.
+7. **Cleanup:** After successful verification, run `docker image prune -f`.
 
-The deployment workflow should:
+The workflow declares repository permission `contents: read`. There is no `AWS_ROLE_ARN`/OIDC configuration in the current workflow; moving to short-lived credentials remains future hardening work.
 
-1. Trigger on a push to `main` (optionally ignore README-only changes).
-2. Run genuine linting and tests as they are added. A Python syntax check is not a substitute for tests.
-3. Authenticate to AWS using OIDC.
-4. Build the Docker image and tag it with `${{ github.sha }}`.
-5. Push the image to ECR.
-6. Run the deployment job on the trusted EC2 runner (`runs-on: [self-hosted, linux, x64, atlas-ec2]`, if that label is registered).
-7. Pull the exact image, replace the container, and verify application health.
-
-Example deployment commands executed **on the EC2 runner**:
-
-```bash
-# IMAGE is the full image URI produced by the build job.
-docker pull "$IMAGE"
-docker rm -f atlas-enterprise-ai || true
-docker run -d \
-  --name atlas-enterprise-ai \
-  --restart unless-stopped \
-  --env-file /opt/atlas/.env \
-  -p 8001:8000 \
-  "$IMAGE"
-```
-
-> **Deployment caution:** This simple stop-and-replace strategy introduces downtime and does not provide automatic rollback. A successful `docker run` is not proof that the application is healthy; use the readiness endpoint and monitor logs. Avoid running untrusted pull-request code on the self-hosted runner.
+> **Deployment caution:** The implemented stop-and-replace strategy introduces downtime and does not provide automatic rollback. A successful `docker run` is not proof that the application is healthy; the workflow checks readiness separately. Avoid running untrusted pull-request code on the self-hosted runner.
 
 ### Verify the deployment
+
+With EC2 running, execute these commands **on the EC2 host**:
 
 ```bash
 docker ps
@@ -349,7 +345,7 @@ curl --fail http://127.0.0.1:8001/health/live
 curl --fail http://127.0.0.1:8001/health/ready
 ```
 
-The readiness endpoint may fail when required dependencies are unavailable; investigate the response and application logs. Use HTTPS and a reverse proxy/load balancer before opening the app to real users.
+The readiness endpoint checks PostgreSQL connectivity with `SELECT 1`; it does not verify Bedrock, Pinecone, S3, or full document question answering. Deployment success therefore establishes container startup and database readiness, not a repeat of the local evaluation below. Use HTTPS and a reverse proxy/load balancer before opening the app to real users.
 
 ## API Reference
 
@@ -478,9 +474,9 @@ This project intentionally prioritizes understandable implementation over produc
 | Pinecone indexing fails | API key, index region, 1,024-dimension configuration, quota |
 | Bedrock request fails | Model availability, region, IAM permissions, model IDs |
 | Database connection fails | Render external URL, TLS setting, credentials, network access |
-| GitHub OIDC authentication fails | IAM trust policy, repository name, branch, audience |
-| ECR pull fails on EC2 | Instance IAM role, ECR permissions, region, Docker login |
-| Deployment job stays queued | Self-hosted runner status and runner labels |
+| GitHub AWS authentication fails | `production` environment secret names, access-key validity, region, and IAM permissions |
+| ECR pull fails on EC2 | Configured AWS credentials, ECR permissions, region, repository name, and Docker login |
+| Deployment job stays queued | EC2 is intentionally stopped; start the instance and runner, then check runner labels |
 | Container exits immediately | `docker logs atlas-enterprise-ai`, missing environment variables |
 | Rius traces are missing | Instrumentation, configuration, API key, network access |
 
