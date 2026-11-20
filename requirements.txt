@@ -13,3 +13,4 @@ python-dotenv==1.0.1
 
 #Agent observability(optional at runtime)
 glassflow-rius>=1.0,<2.0
+pinecone==10.3.0
